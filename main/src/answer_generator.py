@@ -64,7 +64,7 @@ def task_3(file_path: str) -> Tuple[str, str]:
     #
     #
     logger.debug("Done with Task 1 for file {0}".format(file_path))
-    return labels_task3_1[random.randrange(len(labels_task3_1))], labels_task3_2[random.randrange(len(labels_task3_2))]
+    return labels_task3_1[random.randrange(len(labels_task3_1))], 3
 
 
 def main():
