@@ -106,4 +106,7 @@ venv.bak/
 # Data folders
 main_task_data/
 additional_task_data/
+test_dataset/
 
+# PyCharm
+.idea/

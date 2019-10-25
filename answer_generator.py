@@ -11,8 +11,8 @@ FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-input_dir = "\path\to\images"
-answers_file = "\path\to\save\answers\file.csv"
+input_dir = 'test_dataset'
+answers_file = os.path.join('outputs', 'results.csv')
 
 labels_task_1 = ['Bathroom', 'Bathroom cabinet', 'Bathroom sink', 'Bathtub', 'Bed', 'Bed frame',
                  'Bed sheet', 'Bedroom', 'Cabinetry', 'Ceiling', 'Chair', 'Chandelier', 'Chest of drawers',
@@ -64,7 +64,7 @@ def task_3(file_path: str) -> Tuple[str, str]:
     #
     #
     logger.debug("Done with Task 1 for file {0}".format(file_path))
-    return labels_task3_1[random.randrange(len(labels_task3_1))], labels_task3_2[random.randrange(len(labels_task3_2))]
+    return labels_task3_1[random.randrange(len(labels_task3_1))], '3'
 
 
 def main():
@@ -83,7 +83,8 @@ def main():
                 output.append(output_per_file)
 
     with open(answers_file, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=['filename', 'standard', 'task2_class', 'tech_cond'] + labels_task_1)
+        writer = csv.DictWriter(csvfile,
+                                fieldnames=['filename', 'standard', 'task2_class', 'tech_cond'] + labels_task_1)
         writer.writeheader()
         for entry in output:
             logger.debug(entry)
