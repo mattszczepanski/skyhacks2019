@@ -108,6 +108,7 @@ main_task_data/
 additional_task_data/
 test_dataset/
 train_dataset/
+outputs/
 
 # PyCharm
 .idea/
