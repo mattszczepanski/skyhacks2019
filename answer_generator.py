@@ -4,6 +4,11 @@ import logging
 import random
 from typing import Tuple
 
+from fastai.vision import * # import the vision module
+from pathlib import Path
+import pandas as pd
+
+
 __author__ = 'ING_DS_TECH'
 __version__ = "201909"
 
@@ -29,13 +34,26 @@ labels_task3_1 = [1, 2, 3, 4]
 labels_task3_2 = [1, 2, 3, 4]
 
 output = []
-
+path = Path(os.path.dirname(os.path.abspath(__file__)))
+test_il = ImageList.from_folder(Path(input_dir))
+learn = load_learner(path, test=test_il)
+preds, _ = learn.get_preds(ds_type=DatasetType.Test)
+thresh = 0.2
+labelled_preds = [' '.join(
+    [learn.data.classes[i] for i, p in enumerate(pred) if p > thresh]) for
+    pred in preds]
+fnames = [f.name[:-4] for f in learn.data.test_ds.items]
+df = pd.DataFrame({'image_name': fnames, 'tags': labelled_preds},
+                  columns=['image_name', 'tags'])
 
 def task_1(partial_output: dict, file_path: str) -> dict:
     logger.debug("Performing task 1 for file {0}".format(file_path))
 
+    filename = file_path.split(os.sep)[-1:][0][:-4]
+    found_labels = df[df['image_name'] == filename]['tags'].values.tolist()[
+        0].split(' ')
     for label in labels_task_1:
-        partial_output[label] = 0
+        partial_output[label] = 1 if label in found_labels else 0
     #
     #
     #	HERE SHOULD BE A REAL SOLUTION
