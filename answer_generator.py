@@ -99,7 +99,7 @@ def task_2(file_path: str) -> str:
 def task_3(model, task2_label, file_path: str) -> Tuple[str, str]:
     logger.debug("Performing task 3 for file {0}".format(file_path))
 
-    if task2_label == 'dining_room' or task2_label == 'house':
+    if task2_label == 'dinning_room' or task2_label == 'house':
         preds = '3'
     else:
         image_size = 224
@@ -110,7 +110,7 @@ def task_3(model, task2_label, file_path: str) -> Tuple[str, str]:
         x = preprocess_input(x)
 
         preds = model.predict(x)[0][1]
-        preds = int(preds <= 0.5)
+        preds = int(preds >= 0.5)
         preds = preds + 3
 
     logger.debug("Done with Task 1 for file {0}".format(file_path))
