@@ -12,6 +12,11 @@ from tensorflow.python.keras.layers import Dense
 from keras.applications.resnet50 import preprocess_input
 from keras.preprocessing import image
 
+
+from fastai.vision import *  # import the vision module
+from pathlib import Path
+import pandas as pd
+
 __author__ = 'More Powerful'
 __version__ = "201909"
 
@@ -35,6 +40,13 @@ labels_task2 = ['apartment', 'bathroom', 'bedroom', 'dinning_room', 'house', 'ki
 
 output = []
 
+path = Path('models')
+test_il = ImageList.from_folder(Path(input_dir))
+learn = load_learner(path, test=test_il)
+pfiles = learn.data.test_dl.dataset.items
+pfiles = [x.name for x in list(pfiles)]
+pf_to_id = dict([(fname, idx) for idx, fname in enumerate(pfiles)])
+
 
 def load_task_3b_model():
     NUM_CLASSES = 2
@@ -50,16 +62,16 @@ def load_task_3b_model():
     return model
 
 
+
 def task_1(partial_output: dict, file_path: str) -> dict:
     logger.debug("Performing task 1 for file {0}".format(file_path))
 
+    filename = file_path.split(os.sep)[-1:][0]
+    img_id = pf_to_id[filename]
+    found_labels = learn.predict(test_il[img_id])[0].obj
     for label in labels_task_1:
-        partial_output[label] = 0
-    #
-    #
-    #	HERE SHOULD BE A REAL SOLUTION
-    #
-    #
+        partial_output[label] = 1 if label in found_labels else 0
+
     logger.debug("Done with Task 1 for file {0}".format(file_path))
     return partial_output
 
