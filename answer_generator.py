@@ -35,21 +35,27 @@ labels_task3_2 = [1, 2, 3, 4]
 
 output = []
 path = Path(os.path.dirname(os.path.abspath(__file__)))
-test_il = ImageList.from_folder(Path(input_dir))
-learn = load_learner(path, test=test_il)
-preds, _ = learn.get_preds(ds_type=DatasetType.Test)
-thresh = 0.2
-labelled_preds = [' '.join(
-    [learn.data.classes[i] for i, p in enumerate(pred) if p > thresh]) for
-    pred in preds]
-fnames = [f.name[:-4] for f in learn.data.test_ds.items]
-df = pd.DataFrame({'image_name': fnames, 'tags': labelled_preds},
-                  columns=['image_name', 'tags'])
 
-def task_1(partial_output: dict, file_path: str) -> dict:
+
+def predict_task_1():
+    test_il = ImageList.from_folder(Path(input_dir))
+    learn = load_learner(path, test=test_il)
+    preds, _ = learn.get_preds(ds_type=DatasetType.Test)
+    thresh = 0.2
+    labelled_preds = [' '.join(
+        [learn.data.classes[i] for i, p in enumerate(pred) if p > thresh]) for
+        pred in preds]
+    fnames = [f.name[:-4] for f in learn.data.test_ds.items]
+    return pd.DataFrame({'image_name': fnames, 'tags': labelled_preds},
+                      columns=['image_name', 'tags'])
+
+
+def task_1(partial_output: dict, file_path: str, df: pd.DataFrame) -> dict:
+    # TODO remove df and iter by pict
     logger.debug("Performing task 1 for file {0}".format(file_path))
 
     filename = file_path.split(os.sep)[-1:][0][:-4]
+    # TODO
     found_labels = df[df['image_name'] == filename]['tags'].values.tolist()[
         0].split(' ')
     for label in labels_task_1:
