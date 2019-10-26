@@ -3,6 +3,7 @@ import os
 import logging
 import random
 import numpy as np
+import pandas as pd
 from typing import Tuple
 
 from tensorflow.python.keras.applications import ResNet50
@@ -12,10 +13,8 @@ from tensorflow.python.keras.layers import Dense
 from keras.applications.resnet50 import preprocess_input
 from keras.preprocessing import image
 
-
 from fastai.vision import *  # import the vision module
 from pathlib import Path
-import pandas as pd
 
 __author__ = 'More Powerful'
 __version__ = "201909"
@@ -60,7 +59,6 @@ def load_task_3b_model():
     model.add(Dense(NUM_CLASSES, activation=DENSE_LAYER_ACTIVATION))
     model.load_weights("models/trained_models/best.hdf5")
     return model
-
 
 
 def task_1(partial_output: dict, file_path: str) -> dict:
