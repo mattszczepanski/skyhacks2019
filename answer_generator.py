@@ -85,17 +85,22 @@ def task_2(file_path: str) -> str:
     return labels_task2[random.randrange(len(labels_task2))]
 
 
-def task_3(model, file_path: str) -> Tuple[str, str]:
+def task_3(model, task2_label, file_path: str) -> Tuple[str, str]:
     logger.debug("Performing task 3 for file {0}".format(file_path))
-    image_size = 224
 
-    img = image.load_img(file_path, target_size=(image_size, image_size))
-    x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
-    x = preprocess_input(x)
+    if task2_label == 'dining_room' or task2_label == 'house':
+        preds = '3'
+    else:
+        image_size = 224
 
-    preds = model.predict_classes(x)[0]
-    preds = preds + 3
+        img = image.load_img(file_path, target_size=(image_size, image_size))
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        x = preprocess_input(x)
+
+        preds = model.predict(x)[0][1]
+        preds = int(preds <= 0.5)
+        preds = preds + 3
 
     logger.debug("Done with Task 1 for file {0}".format(file_path))
     return preds, '3'
@@ -110,10 +115,11 @@ def main():
         for f in fnames:
             if f.endswith(".jpg"):
                 file_path = os.path.join(dirpath, f)
-                task_3_output = task_3(task_3b_model, file_path)
+                task_2_label = task_2(file_path)
+                task_3_output = task_3(task_3b_model, task_2_label, file_path)
                 output_per_file = {
                     'filename': f,
-                    'task2_class': task_2(file_path),
+                    'task2_class': task_2_label,
                     'tech_cond': task_3_output[0],
                     'standard': task_3_output[1]
                 }
