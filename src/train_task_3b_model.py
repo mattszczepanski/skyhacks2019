@@ -9,7 +9,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 NUM_CLASSES = 2
 
-IMAGE_RESIZE = 512
+IMAGE_RESIZE = 256
 RESNET50_POOLING_AVERAGE = 'avg'
 DENSE_LAYER_ACTIVATION = 'softmax'
 OBJECTIVE_FUNCTION = 'categorical_crossentropy'
