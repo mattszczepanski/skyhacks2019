@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 input_dir = 'data/test_dataset'
 answers_file = os.path.join('outputs', 'results.csv')
 
-labels_task_1 = ['Bathroom', 'Bathroom cabinet', 'Bathroom sink', 'Bathtub', 'Bed', 'Bed frame',
+LABELS_TASK_1 = ['Bathroom', 'Bathroom cabinet', 'Bathroom sink', 'Bathtub', 'Bed', 'Bed frame',
                  'Bed sheet', 'Bedroom', 'Cabinetry', 'Ceiling', 'Chair', 'Chandelier', 'Chest of drawers',
                  'Coffee table', 'Couch', 'Countertop', 'Cupboard', 'Curtain', 'Dining room', 'Door', 'Drawer',
                  'Facade', 'Fireplace', 'Floor', 'Furniture', 'Grass', 'Hardwood', 'House', 'Kitchen',
@@ -57,26 +57,28 @@ def load_task_3b_model():
     model = Sequential()
     model.add(ResNet50(include_top=False, pooling=RESNET50_POOLING_AVERAGE, weights=resnet_weights_path))
     model.add(Dense(NUM_CLASSES, activation=DENSE_LAYER_ACTIVATION))
-    model.load_weights("models/trained_models/best.hdf5")
+    model.load_weights("models/trained_models/the_best_model.hdf5")
     return model
 
 
-def task_1(partial_output: dict, file_path: str) -> dict:
+def task_1(file_path: str) -> dict:
     logger.debug("Performing task 1 for file {0}".format(file_path))
+    partial_output = {}
 
     filename = file_path.split(os.sep)[-1:][0]
     img_id = pf_to_id[filename]
     found_labels = learn.predict(test_il[img_id])[0].obj
-    for label in labels_task_1:
+    print(found_labels)
+    for label in LABELS_TASK_1:
         partial_output[label] = 1 if label in found_labels else 0
 
     logger.debug("Done with Task 1 for file {0}".format(file_path))
     return partial_output
 
 
-def task_2(file_path: str) -> str:
+def task_2(partial_output, classifier, factor, file_path: str) -> str:
     logger.debug("Performing task 2 for file {0}".format(file_path))
-
+    """
     if "dom" in file_path:
         response = "house"
     elif "jadalnia" in file_path:
@@ -89,8 +91,15 @@ def task_2(file_path: str) -> str:
         response = "living_room"
     elif "sypialnia" in file_path:
         response = "bedroom"
+    """
+    if False:
+        pass
     else:
-        raise ValueError("Nazwa spoza słownika!")
+        features = pd.DataFrame(partial_output, index=[0])[LABELS_TASK_1]
+        reversefactor = dict(zip(range(6), factor[1]))
+        y_pred = classifier.predict(features)
+        y_pred = np.vectorize(reversefactor.get)(y_pred)
+        response = y_pred[0]
 
     logger.debug("Done with Task 1 for file {0}".format(file_path))
     return response
@@ -121,12 +130,15 @@ def main():
     logger.debug("Sample answers file generator")
 
     task_3b_model = load_task_3b_model()
+    task_2_classifier = pickle.load(open('models/randomforestmodel.pkl', 'rb'))
+    task_2_factor = pickle.load(open('models/factor.pkl', 'rb'))
 
     for dirpath, dnames, fnames in os.walk(input_dir):
         for f in fnames:
             if f.endswith(".jpg"):
                 file_path = os.path.join(dirpath, f)
-                task_2_label = task_2(file_path)
+                task_1_output = task_1(file_path)
+                task_2_label = task_2(task_1_output, task_2_classifier, task_2_factor, file_path)
                 task_3_output = task_3(task_3b_model, task_2_label, file_path)
                 output_per_file = {
                     'filename': f,
@@ -134,13 +146,13 @@ def main():
                     'tech_cond': task_3_output[0],
                     'standard': task_3_output[1]
                 }
-                output_per_file = task_1(output_per_file, file_path)
+                output_per_file.update(task_1_output)
 
                 output.append(output_per_file)
 
     with open(answers_file, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile,
-                                fieldnames=['filename', 'standard', 'task2_class', 'tech_cond'] + labels_task_1)
+                                fieldnames=['filename', 'standard', 'task2_class', 'tech_cond'] + LABELS_TASK_1)
         writer.writeheader()
         for entry in output:
             logger.debug(entry)
