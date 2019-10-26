@@ -39,12 +39,20 @@ labels_task2 = ['apartment', 'bathroom', 'bedroom', 'dinning_room', 'house', 'ki
 
 output = []
 
-path = Path('models')
-test_il = ImageList.from_folder(Path(input_dir))
-learn = load_learner(path, test=test_il)
-pfiles = learn.data.test_dl.dataset.items
-pfiles = [x.name for x in list(pfiles)]
-pf_to_id = dict([(fname, idx) for idx, fname in enumerate(pfiles)])
+
+def generate_task_1_predictions():
+    path = Path('models')
+    test_il = ImageList.from_folder(Path(input_dir))
+    learn = load_learner(path, test=test_il)
+    predictions, _ = learn.get_preds(ds_type=DatasetType.Test)
+    threshold = 0.3
+
+    labeled_preds = {
+        str(path): [learn.data.classes[i] for i, p in enumerate(pred) if p > threshold]
+        for path, pred in zip(test_il.items, predictions)
+    }
+
+    return labeled_preds
 
 
 def load_task_3b_model():
@@ -61,14 +69,11 @@ def load_task_3b_model():
     return model
 
 
-def task_1(file_path: str) -> dict:
+def task_1(all_predictions, file_path: str) -> dict:
     logger.debug("Performing task 1 for file {0}".format(file_path))
     partial_output = {}
 
-    filename = file_path.split(os.sep)[-1:][0]
-    img_id = pf_to_id[filename]
-    found_labels = learn.predict(test_il[img_id])[0].obj
-    print(found_labels)
+    found_labels = all_predictions[file_path]
     for label in LABELS_TASK_1:
         partial_output[label] = 1 if label in found_labels else 0
 
@@ -129,15 +134,16 @@ def task_3(model, task2_label, file_path: str) -> Tuple[str, str]:
 def main():
     logger.debug("Sample answers file generator")
 
-    task_3b_model = load_task_3b_model()
+    task_1_predictions = generate_task_1_predictions()
     task_2_classifier = pickle.load(open('models/randomforestmodel.pkl', 'rb'))
     task_2_factor = pickle.load(open('models/factor.pkl', 'rb'))
+    task_3b_model = load_task_3b_model()
 
     for dirpath, dnames, fnames in os.walk(input_dir):
         for f in fnames:
             if f.endswith(".jpg"):
                 file_path = os.path.join(dirpath, f)
-                task_1_output = task_1(file_path)
+                task_1_output = task_1(task_1_predictions, file_path)
                 task_2_label = task_2(task_1_output, task_2_classifier, task_2_factor, file_path)
                 task_3_output = task_3(task_3b_model, task_2_label, file_path)
                 output_per_file = {
