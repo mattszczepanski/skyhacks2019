@@ -1,12 +1,12 @@
 from fastai.callbacks import SaveModelCallback
-from fastai.vision import * # import the vision module
+from fastai.vision import *  # import the vision module
 from pathlib import Path
 
 if __name__ == '__main__':
     tfms = get_transforms(flip_vert=True, max_lighting=0.1, max_zoom=1.05,
                           max_warp=0.)
 
-    src = (ImageList.from_csv(Path('D:\PROGRAMOWANIE\PycharmProjects\skyhacks'),
+    src = (ImageList.from_csv(Path('../data'),
                               'train.csv', folder='combined', suffix='.jpg')
            # Load data from csv
            .random_split_by_pct(0.2)

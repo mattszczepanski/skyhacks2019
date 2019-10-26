@@ -4,10 +4,9 @@ import logging
 import random
 from typing import Tuple
 
-from fastai.vision import * # import the vision module
+from fastai.vision import *  # import the vision module
 from pathlib import Path
 import pandas as pd
-
 
 __author__ = 'ING_DS_TECH'
 __version__ = "201909"
@@ -16,7 +15,7 @@ FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-input_dir = 'test_dataset'
+input_dir = 'data/test_dataset'
 answers_file = os.path.join('outputs', 'results.csv')
 
 labels_task_1 = ['Bathroom', 'Bathroom cabinet', 'Bathroom sink', 'Bathtub', 'Bed', 'Bed frame',
@@ -34,12 +33,15 @@ labels_task3_1 = [1, 2, 3, 4]
 labels_task3_2 = [1, 2, 3, 4]
 
 output = []
-path = Path(os.path.dirname(os.path.abspath(__file__)))
+
+
+path = Path('models')
 test_il = ImageList.from_folder(Path(input_dir))
 learn = load_learner(path, test=test_il)
 pfiles = learn.data.test_dl.dataset.items
 pfiles = [x.name for x in list(pfiles)]
 pf_to_id = dict([(fname, idx) for idx, fname in enumerate(pfiles)])
+
 
 def task_1(partial_output: dict, file_path: str) -> dict:
     logger.debug("Performing task 1 for file {0}".format(file_path))
