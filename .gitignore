@@ -111,5 +111,8 @@ val_dataset/
 test_dataset/
 outputs/
 
+# Models folders
+models/
+
 # PyCharm
 .idea/
