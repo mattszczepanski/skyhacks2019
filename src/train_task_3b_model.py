@@ -22,16 +22,13 @@ EARLY_STOP_PATIENCE = 3
 STEPS_PER_EPOCH_TRAINING = 10
 STEPS_PER_EPOCH_VALIDATION = 10
 
-BATCH_SIZE_TRAINING = 50
-BATCH_SIZE_VALIDATION = 50
+BATCH_SIZE_TRAINING = 10
+BATCH_SIZE_VALIDATION = 10
 
 resnet_weights_path = '../models/resnet50/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
 model = Sequential()
 model.add(ResNet50(include_top=False, pooling=RESNET50_POOLING_AVERAGE, weights=resnet_weights_path))
-model.add(Dense(128, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(32, activation='relu'))
 model.add(Dense(NUM_CLASSES, activation=DENSE_LAYER_ACTIVATION))
 model.layers[0].trainable = False
 
@@ -52,7 +49,7 @@ train_generator = data_generator.flow_from_directory(
     class_mode='categorical')
 
 validation_generator = data_generator.flow_from_directory(
-    '../data/val_dataset',
+    '../data/val_clean_dataset',
     target_size=(image_size, image_size),
     batch_size=BATCH_SIZE_VALIDATION,
     class_mode='categorical')
