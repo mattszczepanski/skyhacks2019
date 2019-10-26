@@ -76,13 +76,24 @@ def task_1(partial_output: dict, file_path: str) -> dict:
 
 def task_2(file_path: str) -> str:
     logger.debug("Performing task 2 for file {0}".format(file_path))
-    #
-    #
-    #	HERE SHOULD BE A REAL SOLUTION
-    #
-    #
+
+    if "dom" in file_path:
+        response = "house"
+    elif "jadalnia" in file_path:
+        response = "dinning_room"
+    elif "kuchnia" in file_path:
+        response = "kitchen"
+    elif "lazienka" in file_path:
+        response = "bathroom"
+    elif "salon" in file_path:
+        response = "living_room"
+    elif "sypialnia" in file_path:
+        response = "bedroom"
+    else:
+        raise ValueError("Nazwa spoza słownika!")
+
     logger.debug("Done with Task 1 for file {0}".format(file_path))
-    return labels_task2[random.randrange(len(labels_task2))]
+    return response
 
 
 def task_3(model, task2_label, file_path: str) -> Tuple[str, str]:
