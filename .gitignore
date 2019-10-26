@@ -110,6 +110,8 @@ train_dataset/
 val_dataset/
 test_dataset/
 outputs/
+train_clean_dataset/
+val_clean_dataset/
 
 # Models folders
 models/
