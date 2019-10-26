@@ -106,8 +106,9 @@ venv.bak/
 # Data folders
 main_task_data/
 additional_task_data/
-test_dataset/
 train_dataset/
+val_dataset/
+test_dataset/
 outputs/
 
 # PyCharm

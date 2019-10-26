@@ -2,9 +2,17 @@ import csv
 import os
 import logging
 import random
+import numpy as np
 from typing import Tuple
 
-__author__ = 'ING_DS_TECH'
+from tensorflow.python.keras.applications import ResNet50
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import Dense
+
+from keras.applications.resnet50 import preprocess_input
+from keras.preprocessing import image
+
+__author__ = 'More Powerful'
 __version__ = "201909"
 
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
@@ -25,10 +33,21 @@ labels_task_1 = ['Bathroom', 'Bathroom cabinet', 'Bathroom sink', 'Bathtub', 'Be
 
 labels_task2 = ['apartment', 'bathroom', 'bedroom', 'dinning_room', 'house', 'kitchen', 'living_room']
 
-labels_task3_1 = [1, 2, 3, 4]
-labels_task3_2 = [1, 2, 3, 4]
-
 output = []
+
+
+def load_task_3b_model():
+    NUM_CLASSES = 2
+
+    RESNET50_POOLING_AVERAGE = 'avg'
+    DENSE_LAYER_ACTIVATION = 'softmax'
+    resnet_weights_path = 'models/resnet50/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
+
+    model = Sequential()
+    model.add(ResNet50(include_top=False, pooling=RESNET50_POOLING_AVERAGE, weights=resnet_weights_path))
+    model.add(Dense(NUM_CLASSES, activation=DENSE_LAYER_ACTIVATION))
+    model.load_weights("models/trained_models/best.hdf5")
+    return model
 
 
 def task_1(partial_output: dict, file_path: str) -> dict:
@@ -56,28 +75,38 @@ def task_2(file_path: str) -> str:
     return labels_task2[random.randrange(len(labels_task2))]
 
 
-def task_3(file_path: str) -> Tuple[str, str]:
+def task_3(model, file_path: str) -> Tuple[str, str]:
     logger.debug("Performing task 3 for file {0}".format(file_path))
-    #
-    #
-    #	HERE SHOULD BE A REAL SOLUTION
-    #
-    #
+    image_size = 224
+
+    img = image.load_img(file_path, target_size=(image_size, image_size))
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+
+    preds = model.predict_classes(x)
+    preds = preds + 3
+
     logger.debug("Done with Task 1 for file {0}".format(file_path))
-    return random.choice(['3', '4']), '3'
+    return preds, '3'
 
 
 def main():
     logger.debug("Sample answers file generator")
+
+    task_3b_model = load_task_3b_model()
+
     for dirpath, dnames, fnames in os.walk(input_dir):
         for f in fnames:
             if f.endswith(".jpg"):
                 file_path = os.path.join(dirpath, f)
-                output_per_file = {'filename': f,
-                                   'task2_class': task_2(file_path),
-                                   'tech_cond': task_3(file_path)[0],
-                                   'standard': task_3(file_path)[1]
-                                   }
+                task_3_output = task_3(task_3b_model, file_path)
+                output_per_file = {
+                    'filename': f,
+                    'task2_class': task_2(file_path),
+                    'tech_cond': task_3_output[0],
+                    'standard': task_3_output[1]
+                }
                 output_per_file = task_1(output_per_file, file_path)
 
                 output.append(output_per_file)
