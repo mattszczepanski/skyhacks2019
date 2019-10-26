@@ -19,7 +19,7 @@ FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-input_dir = 'test_dataset'
+input_dir = 'data/test_dataset'
 answers_file = os.path.join('outputs', 'results.csv')
 
 labels_task_1 = ['Bathroom', 'Bathroom cabinet', 'Bathroom sink', 'Bathtub', 'Bed', 'Bed frame',
@@ -84,7 +84,7 @@ def task_3(model, file_path: str) -> Tuple[str, str]:
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)
 
-    preds = model.predict_classes(x)
+    preds = model.predict_classes(x)[0]
     preds = preds + 3
 
     logger.debug("Done with Task 1 for file {0}".format(file_path))
