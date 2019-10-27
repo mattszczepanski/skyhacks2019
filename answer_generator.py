@@ -2,6 +2,7 @@ import csv
 import os
 import logging
 import random
+import xgboost
 import numpy as np
 import pandas as pd
 from typing import Tuple
@@ -13,7 +14,7 @@ from tensorflow.python.keras.layers import Dense
 from keras.applications.resnet50 import preprocess_input
 from keras.preprocessing import image
 
-from fastai.vision import *  # import the vision module
+from fastai.vision import *
 from pathlib import Path
 
 __author__ = 'More Powerful'
@@ -108,7 +109,7 @@ def generate_task_1_predictions():
         current_class_output = []
         for i, p in enumerate(pred):
             curr_class = learn.data.classes[i]
-            if p > class_conf_dict.setdefault(curr_class, 0)*0.1:
+            if p > class_conf_dict.setdefault(curr_class, 0) * 0.1:
                 current_class_output.append(curr_class)
         labeled_preds[str(path)] = current_class_output
     return labeled_preds
@@ -160,10 +161,10 @@ def task_2(partial_output, classifier, factor, file_path: str) -> str:
         pass
     else:
         features = pd.DataFrame(partial_output, index=[0])[LABELS_TASK_1]
-        reversefactor = dict(zip(range(6), factor[1]))
-        y_pred = classifier.predict(features)
-        y_pred = np.vectorize(reversefactor.get)(y_pred)
-        response = y_pred[0]
+        features = xgboost.DMatrix(features)
+        reversefactor = {v: k for k, v in factor.items()}
+        predicted_class = int(classifier.predict(features)[0])
+        response = reversefactor[predicted_class]
 
     logger.debug("Done with Task 1 for file {0}".format(file_path))
     return response
@@ -194,11 +195,10 @@ def main():
     logger.debug("Sample answers file generator")
 
     task_1_predictions = generate_task_1_predictions()
-    task_2_classifier = pickle.load(open('models/randomforestmodel.pkl', 'rb'))
-    task_2_factor = pickle.load(open('models/factor.pkl', 'rb'))
+    task_2_classifier = pickle.load(open('models/xgboost.pkl', 'rb'))
+    task_2_factor = pickle.load(open('models/mapper.pkl', 'rb'))
+    task_2_factor['dinning_room'] = task_2_factor.pop('dining_room')  # Bugfix for class name
     task_3b_model = load_task_3b_model()
-
-    print(task_1_predictions)
 
     for dirpath, dnames, fnames in os.walk(input_dir):
         for f in fnames:
