@@ -39,19 +39,78 @@ labels_task2 = ['apartment', 'bathroom', 'bedroom', 'dinning_room', 'house', 'ki
 
 output = []
 
+class_conf_dict = {
+    'Refrigerator': 0.06030190759899247,
+    'Tablecloth': 0.07619271434173108,
+    'Grass': 0.0807849153127913,
+    'Nightstand': 0.08298336884261699,
+    'Chandelier': 0.08720960113791561,
+    'Shower': 0.09123444721531762,
+    'Chest of drawers': 0.09317955689643795,
+    'Drawer': 0.0950834843104803,
+    'Rural area': 0.09877726671883286,
+    'Fireplace': 0.10057131145144356,
+    'Urban area': 0.10233260797103441,
+    'Cupboard': 0.10743596585062351,
+    'Sky': 0.12570050205590746,
+    'Bathtub': 0.12984281590613014,
+    'Bathroom sink': 0.1311924964259911,
+    'Kitchen & dining room table': 0.13899555562930258,
+    'Kitchen stove': 0.14515285869102879,
+    'Window': 0.14871418739556916,
+    'Door': 0.15332185385017896,
+    'Tree': 0.15778153063947187,
+    'Bathroom cabinet': 0.1588747959804537,
+    'Tap': 0.1642198320526484,
+    'Facade': 0.16526567952580895,
+    'Coffee table': 0.1683595016657622,
+    'Toilet': 0.17238744029201253,
+    'Chair': 0.18479354350932545,
+    'Curtain': 0.18479354350932856,
+    'Roof': 0.18752293919156546,
+    'Mattress': 0.20218319120289496,
+    'Couch': 0.21719184712566733,
+    'Sink': 0.22460287433453033,
+    'Hardwood': 0.23102038866945515,
+    'Plumbing fixture': 0.2869175941071937,
+    'Dining room': 0.30903645814569963,
+    'Tile': 0.32462785611570505,
+    'Room': 0.32633048218545124,
+    'Countertop': 0.32675373374126687,
+    'Cabinetry': 0.3309343517141135,
+    'Bed frame': 0.33298998517581796,
+    'Bed sheet': 0.33902321535115104,
+    'Kitchen': 0.35015049345375365,
+    'Property': 0.35636588962600474,
+    'Bathroom': 0.35672476944516546,
+    'House': 0.3847491563804744,
+    'Table': 0.3972542820622387,
+    'Bed': 0.39753304997747707,
+    'Wall': 0.41603210209131347,
+    'Ceiling': 0.4160321020913136,
+    'Real estate': 0.4165179695452889,
+    'Bedroom': 0.41891978456561496,
+    'Living room': 0.42220639657003967,
+    'Furniture': 0.44383797361977606,
+    'Floor': 0.49118487285743256
+}
+
 
 def generate_task_1_predictions():
     path = Path('models')
     test_il = ImageList.from_folder(Path(input_dir))
     learn = load_learner(path, test=test_il)
     predictions, _ = learn.get_preds(ds_type=DatasetType.Test)
-    threshold = 0.3
 
-    labeled_preds = {
-        str(path): [learn.data.classes[i] for i, p in enumerate(pred) if p > threshold]
-        for path, pred in zip(test_il.items, predictions)
-    }
+    labeled_preds = {}
 
+    for path, pred in zip(test_il.items, predictions):
+        current_class_output = []
+        for i, p in enumerate(pred):
+            curr_class = learn.data.classes[i]
+            if p > class_conf_dict.setdefault(curr_class, 0)*0.1:
+                current_class_output.append(curr_class)
+        labeled_preds[str(path)] = current_class_output
     return labeled_preds
 
 
@@ -138,6 +197,8 @@ def main():
     task_2_classifier = pickle.load(open('models/randomforestmodel.pkl', 'rb'))
     task_2_factor = pickle.load(open('models/factor.pkl', 'rb'))
     task_3b_model = load_task_3b_model()
+
+    print(task_1_predictions)
 
     for dirpath, dnames, fnames in os.walk(input_dir):
         for f in fnames:
