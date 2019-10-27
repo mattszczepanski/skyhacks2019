@@ -11,10 +11,10 @@ if __name__ == '__main__':
            # Load data from csv
            .random_split_by_pct(0.2)
            # split data into training and validation set (20% validation)
-           .label_from_df(label_delim=' ')
+           .label_from_df(label_delim=';')
            # label data using the tags column (second column is default)
            )
-    data = (src.transform(tfms, size=200)
+    data = (src.transform(tfms, size=400)
             # Apply transforms and scale images to 128x128
             .databunch(bs=48).normalize(imagenet_stats)
             # Create databunch with batchsize=64 and normalize the images
@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     learn = create_cnn(data, models.resnet50, metrics=[acc_02, f_score])
 
-    lr = 0.02
+    lr = 0.01
 
     learn.unfreeze()
     learn.fit_one_cycle(5, lr, callbacks=[SaveModelCallback(learn)])
