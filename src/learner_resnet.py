@@ -2,12 +2,14 @@ from fastai.callbacks import SaveModelCallback
 from fastai.vision import *  # import the vision module
 from pathlib import Path
 
+
 if __name__ == '__main__':
+    data_path = Path('Downloads')/'SKYHACKS'/'skyhacks_hackathon_dataset'
     tfms = get_transforms(flip_vert=True, max_lighting=0.1, max_zoom=1.05,
                           max_warp=0.)
 
-    src = (ImageList.from_csv(Path('../data'),
-                              'train.csv', folder='combined', suffix='.jpg')
+    src = (ImageList.from_csv(data_path,
+                              'train.csv', folder='training_images', suffix='.jpg')
            # Load data from csv
            .random_split_by_pct(0.2)
            # split data into training and validation set (20% validation)
@@ -16,7 +18,7 @@ if __name__ == '__main__':
            )
     data = (src.transform(tfms, size=400)
             # Apply transforms and scale images to 128x128
-            .databunch(bs=48).normalize(imagenet_stats)
+            .databunch(bs=16).normalize(imagenet_stats)
             # Create databunch with batchsize=64 and normalize the images
             )
     acc_02 = partial(accuracy_thresh, thresh=0.2)
